@@ -1,5 +1,3 @@
-import Spreadsheet from 'gasmask/src/SpreadsheetApp/Spreadsheet';
-
 export type { Spreadsheet, Sheet } from 'gasmask/src/SpreadsheetApp';
 
 /**
