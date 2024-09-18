@@ -292,6 +292,51 @@ describe('SheetQuery', () => {
 
       expect(rows.length).toEqual(defaultSheetData.length);
     });
+    it('should not error with many rows.', () => {
+      setupSpreadsheet(defaultSheetData);
+
+      const newRows: DictObject[] = ((multiply) => [...multiply, ...multiply])([
+        {
+          Date: '2021-01-02',
+          Amount: -554.23,
+          Name: 'BigBox, inc. __INSERT_TEST__',
+          XtraCol: 'whatever',
+        },
+        {
+          Date: '2021-01-02',
+          Amount: -29.74,
+          Name: 'Fast-n-greasy Food, Inc. __INSERT_TEST__',
+          XtraCol: 'nope',
+        },
+      ]);
+
+      // Insert rows
+      const sq = sheetQuery(ss).from(SHEET_NAME);
+      sq._sheet = {
+        values: [...defaultSheetData],
+        appendRow: () => {}, //not needed
+        getLastRow: () => sq._sheet.values.length,
+        getLastColumn: () => sq._sheet.values[0].length,
+        insertRowsAfter: () => {},
+        getRange: () => ({
+          //@ts-ignore
+          setValues: (range: any) => {
+            //@ts-ignore
+            sq._sheet.values = sq._sheet.values.concat(range);
+          },
+        }),
+      } as unknown as GoogleAppsScript.Spreadsheet.Sheet;
+      //@ts-ignore
+      sq._sheetHeadings = defaultSheetData[0];
+
+      //@ts-ignore
+      sq.insertRows(newRows);
+
+      const query = sheetQuery(ss).from(SHEET_NAME);
+      const rows = query.getRows();
+
+      expect(rows.length).toEqual(defaultSheetData.length);
+    });
   });
 
   describe('updateRows', () => {

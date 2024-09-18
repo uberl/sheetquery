@@ -1,3 +1,5 @@
+import Spreadsheet from 'gasmask/src/SpreadsheetApp/Spreadsheet';
+
 export type { Spreadsheet, Sheet } from 'gasmask/src/SpreadsheetApp';
 
 /**
@@ -76,7 +78,7 @@ export class SheetQueryBuilder {
    *
    * @return {Sheet}
    */
-  getSheet() {
+  getSheet(): GoogleAppsScript.Spreadsheet.Sheet {
     if (!this.sheetName) {
       throw new Error('SheetQuery: No sheet selected. Select sheet with .from(sheetName) method');
     }
@@ -211,22 +213,35 @@ export class SheetQueryBuilder {
     const sheet = this.getSheet();
     const headings = this.getHeadings();
 
-    newRows.forEach((row) => {
-      if (!row) {
-        return;
-      }
+    if (headings.length === 0) {
+      return this;
+    }
 
-      const rowValues = headings.map((heading) => {
-        const val = row[heading];
-        return val === undefined || val === null || val === false ? '' : val;
-      });
+    const range = newRows
+      .filter((row) => !!row)
+      .map((row) =>
+        headings.map((heading) => {
+          let val = row[heading];
+          return val === undefined || val === null || val === false ? '' : val;
+        })
+      );
 
-      // appendRow() will throw if array is empty, so we check to prevent that
-      if (rowValues && rowValues.length !== 0) {
-        sheet.appendRow(rowValues);
-      }
-    });
+    const numberOfNewRows = range.length;
 
+    if (numberOfNewRows === 0) {
+      return this;
+    }
+
+    const lastRowIndex = sheet.getLastRow();
+    const numberOfColumns = headings.length;
+    //fast insert
+    if (numberOfNewRows > 3) {
+      sheet.insertRowsAfter(lastRowIndex, range.length);
+      sheet.getRange(lastRowIndex + 1, 1, numberOfNewRows, numberOfColumns).setValues(range);
+      return this;
+    }
+
+    range.forEach((row) => sheet.appendRow(row));
     return this;
   }
 
