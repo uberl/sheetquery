@@ -1,3 +1,4 @@
+/// <reference types="google-apps-script" />
 export type { Spreadsheet, Sheet } from 'gasmask/src/SpreadsheetApp';
 /**
  * Run new sheet query
@@ -52,7 +53,7 @@ export declare class SheetQueryBuilder {
      *
      * @return {Sheet}
      */
-    getSheet(): any;
+    getSheet(): GoogleAppsScript.Spreadsheet.Sheet;
     /**
      * Get values in sheet from current query + where condition
      */
