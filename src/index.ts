@@ -211,6 +211,7 @@ export class SheetQueryBuilder {
     const sheet = this.getSheet();
     const headings = this.getHeadings();
 
+    //empty spreadsheet
     if (headings.length === 0) {
       return this;
     }
